@@ -1,10 +1,11 @@
-const AIRTABLE_TOKEN =
-process.env.AIRTABLE_TOKEN;
+const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
+const BASE_ID = process.env.BASE_ID;
 
-const BASE_ID =
-process.env.BASE_ID;
+async function run() {
 
-async function run(){
+try {
+
+console.log("Starting sync...");
 
 const response =
 await fetch(
@@ -14,38 +15,52 @@ await fetch(
 const data =
 await response.json();
 
-const item =
-data.hits[0];
+console.log("Fetched HackerNews.");
 
-const result =
+const item = data.hits[0];
+
+console.log("Article:", item.title);
+
+const airtableResponse =
 await fetch(
 `https://api.airtable.com/v0/${BASE_ID}/Tech%20News%20Tracker`,
 {
 method:"POST",
 
 headers:{
-Authorization:
-`Bearer ${AIRTABLE_TOKEN}`,
-
-"Content-Type":
-"application/json"
+Authorization:`Bearer ${AIRTABLE_TOKEN}`,
+"Content-Type":"application/json"
 },
 
 body:JSON.stringify({
-
 fields:{
 Title:item.title,
 Source:"HackerNews",
 URL:item.url
 }
-
 })
-
-});
+}
+);
 
 console.log(
-await result.json()
+"Airtable Status:",
+airtableResponse.status
 );
+
+const result =
+await airtableResponse.json();
+
+console.log(
+"Airtable Response:",
+JSON.stringify(result,null,2)
+);
+
+}
+catch(err){
+
+console.error("ERROR:",err);
+
+}
 
 }
 
